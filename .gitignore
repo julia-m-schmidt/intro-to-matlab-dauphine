@@ -1,0 +1,36 @@
+# ---- Secrets: never commit an API key ----
+*key*.txt
+*apikey*
+*api_key*
+secrets.m
+nasdaq_key.m
+.env
+
+# ---- MATLAB ----
+*.asv
+*.m~
+*.mex*
+slprj/
+codegen/
+*.autosave
+
+# ---- macOS / Windows / Linux junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# ---- LaTeX build artefacts ----
+*.aux
+*.log
+*.out
+*.nav
+*.snm
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# ---- Large or regenerable data ----
+*.mat
+!data/*.mat
