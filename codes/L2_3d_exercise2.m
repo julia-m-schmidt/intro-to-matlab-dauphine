@@ -82,9 +82,112 @@ title('Stock price returns, 1911-1970');
 % in the regression you are about to run.
 
 %% STEP 2 (slide 24): estimate rt = b0 + b1*gt + b2*BYt + et
-X    = [ones(size(rt)), gt, BYt];
-beta = X \ rt;                 % backslash - see L1_assignment on why not inv()
-yhat = X * beta;
+%
+%  WHAT IS ACTUALLY IN X?
+%  One row per YEAR. One column per THING THAT GETS ITS OWN COEFFICIENT.
+%  We have 60 years and 3 coefficients (b0, b1, b2), so X is 60x3:
+%
+%                col 1    col 2     col 3          what we explain
+%               (ones)     gt        BYt                  rt
+%       1911  [    1      0.92      3.90  ]             -1.18
+%       1912  [    1      4.03      3.90  ]              3.09
+%        ...       ...     ...       ...                  ...
+%       1970  [    1     -1.72      7.60  ]            -15.47
+%               \____/   \_______________/
+%              intercept    the real data
+%
+%  THE COLUMN OF ONES IS THE WHOLE TRICK, and it is the part nobody explains.
+%  We want b0 added to every year. There is no "and also add a constant"
+%  button. So we invent a regressor that equals 1 in every single year -
+%  because b0*1 = b0. The intercept becomes an ordinary coefficient on a
+%  column of ones. That is the entire idea.
+%
+%  Delete that column and you have NOT estimated "the same model, no
+%  intercept". You have forced the plane through the origin: you are asserting
+%  that a year with zero growth and a zero bond yield must have zero return.
+%
+%  SHAPES ARE THE WHOLE STORY:
+%       X is 60x3,  beta is 3x1,  so  X*beta is 60x1 - one fitted value per
+%       year, matching rt. When a regression refuses to run, print size() of
+%       both sides before you change anything else. It is almost always this.
+
+X    = [ones(size(rt)), gt, BYt];   % 60x3 - see the sketch above
+beta = X \ rt;                      % 3x1  - [b0; b1; b2]
+yhat = X * beta;                    % 60x1 - one prediction per year
+
+%  WHAT BACKSLASH IS DOING - IT IS NOT WHAT IT LOOKS LIKE.
+%  X\rt does not solve X*beta = rt. That system has 60 equations and 3
+%  unknowns; it has NO solution. Backslash returns the beta that makes the
+%  miss as small as possible - it minimises sum((rt - X*beta).^2). MATLAB
+%  sees that X is tall, and quietly switches from "solve" to "least squares"
+%  (via QR). Same operator, different job, no announcement.
+%
+%  Note the .^2 there: square each residual, then add them up. Element-wise.
+%  Writing ^2 would ask for a matrix power and is a different question
+%  entirely - see L1_matrix_exercise3.
+%
+%  FIVE WAYS TO GET THE SAME beta. All five agree here to about 8 digits.
+%  They stop agreeing when X is badly conditioned, which is the whole point.
+%
+%    1)  beta = X \ rt;                 <- what we use. QR. Short and accurate
+%
+%    2)  beta = (X'*X) \ (X'*rt);       <- the "normal equations" from the
+%                                          textbook. Correct, but forming X'X
+%                                          SQUARES the conditioning: here
+%                                          cond(X) = 28 becomes cond(X'X) = 804,
+%                                          so it throws away about twice as many
+%                                          digits. Costs nothing to avoid
+%
+%    3)  beta = pinv(X) * rt;           <- pseudo-inverse. Fine. It also returns
+%                                          an answer when the columns are
+%                                          collinear, which is either a rescue
+%                                          or a cover-up depending on whether
+%                                          you noticed
+%
+%    4)  beta = lscov(X, rt);           <- base MATLAB. The one to reach for
+%                                          when you need weights, or want the
+%                                          standard errors without a toolbox
+%
+%    5)  beta = inv(X'*X) * X'*rt;      <- DO NOT. Identical on paper, worst
+%                                          numerically, and it builds an entire
+%                                          matrix just to use it once.
+%                                          See L1_assignment
+%
+%  THE TWO THAT DO MUCH MORE (Statistics and Machine Learning Toolbox).
+%  Both are perfectly usable here. They differ in what they hand back:
+%
+%   A) mdl = fitlm([gt BYt], rt)          <- EASIEST TO READ
+%
+%      Prints a formatted table: coefficient, standard error, t-statistic and
+%      p-value for every regressor, plus R^2, adjusted R^2 and the F-test.
+%      Everything we compute by hand below, laid out for you. Then
+%      mdl.Coefficients.Estimate is the same beta as above, and plot(mdl) and
+%      mdl.Residuals come free.
+%
+%   B) [b, bint, r, rint, stats] = regress(rt, X)   <- NUMBERS, NOT A TABLE
+%
+%      b = the same beta. bint = 95% confidence intervals. r = residuals.
+%      stats = [R^2, F, p, error variance] - so our R2 line is stats(1).
+%      Nothing is printed; you get plain arrays. Better when you want to
+%      compute WITH the output rather than look at it.
+%
+%  THE TRAP, and people hit it every single year - THE TWO WANT OPPOSITE INPUT:
+%
+%      fitlm  ADDS the intercept itself ('Intercept' is true by default), so
+%             you pass the RAW regressors [gt BYt]. Hand it our X and you get a
+%             duplicated constant column and a rank-deficiency warning.
+%
+%      regress does NOT. Its X is the full design matrix, so it NEEDS our
+%             ones column. Forget it and you have silently estimated a model
+%             through the origin - no warning, just wrong numbers.
+%
+%  Same toolbox, opposite conventions. Check the doc every time; note that the
+%  argument ORDER differs too - fitlm(X, y) but regress(y, X).
+%
+%  WHY WE STILL TYPE X\rt FIRST: building X yourself is the part that teaches
+%  you what a regression IS - especially the column of ones. Use fitlm to CHECK
+%  your answer, not to avoid understanding it. (Our R2 above agrees with
+%  fitlm's to about 1e-16.)
 
 R2 = 1 - var(rt - yhat)/var(rt);
 
@@ -95,6 +198,46 @@ fprintf('\nOLS fit: rt = %.3f %+.3f*gt %+.3f*BY   (R^2 = %.3f)\n', ...
 % (n-1), so the ratio is exactly SSR/SST. It agrees with fitlm to 1e-16 -
 % I checked. It only works because the model has an intercept, which forces
 % mean(e) = 0. Drop the ones-column and this formula quietly lies to you.
+
+%% STEP 2b: check it with fitlm  (Statistics and Machine Learning Toolbox)
+%  We built X by hand because the column of ones is the part worth
+%  understanding. Now let the toolbox do the same job and confirm we agree.
+%  Use fitlm to CHECK your answer, never to avoid understanding it.
+
+if isempty(which('fitlm'))
+    fprintf(['\n(Skipping the fitlm check: needs the Statistics and Machine ' ...
+             'Learning Toolbox. Check with: ver)\n']);
+else
+    %  NOTE what we pass: the RAW regressors, NOT X. fitlm adds the intercept
+    % itself ('Intercept' is true by default). Hand it our X and you get a
+    % duplicated constant column and a rank-deficiency warning.
+    mdl = fitlm([gt BYt], rt)      % no semicolon: we WANT the table printed
+
+    %  The printed table gives, for every coefficient, the standard error, the
+    % t-statistic and the p-value - none of which the backslash told us - plus
+    % R^2, adjusted R^2 and the F-test. x1 is gt, x2 is BYt.
+
+    %  Do the two agree? Do not take my word for it:
+    fprintf('largest gap between X\\rt and fitlm: %.2e\n', ...
+        max(abs(mdl.Coefficients.Estimate - beta)));
+    fprintf('R^2 by hand %.6f   vs   fitlm %.6f\n', R2, mdl.Rsquared.Ordinary);
+
+    %  Both differences are around 1e-14 - i.e. zero, in floating point.
+    % Same estimator, same answer, two routes.
+end
+
+%  THE OTHER ONE: regress(). Same numbers, no printed table, and it wants
+% the OPPOSITE input to fitlm:
+%
+%       [b, bint, r, rint, stats] = regress(rt, X);   % <- X, ones column INCLUDED
+%
+%  b = beta. bint = 95% confidence intervals. r = residuals.
+%  stats = [R^2, F, p, error variance], so stats(1) is our R2.
+%
+%  So: fitlm([gt BYt], rt) but regress(rt, X). Different argument order AND
+% opposite intercept conventions, in the same toolbox. Forget the ones column
+% in regress and you have silently fitted through the origin - no warning.
+%  Use fitlm to LOOK at a regression, regress to COMPUTE with one.
 
 %% STEP 3 (slide 24): scatter3 with the 'filled' option
 fig = figure('Name','3D scatter + fitted plane','Color','w');
