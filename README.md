@@ -35,6 +35,20 @@ Each assignment ends with a short **AI log** — 2–3 lines:
 It is not graded. *"It got nothing wrong"* is a perfectly good answer — **if** you say how you
 checked.
 
+### Which assistant?
+
+Whichever you like. Two notes on access, since they come up:
+
+- **MATLAB Copilot** (built into MATLAB) is covered by the university licence, but **not** by a
+  personal *Student* or *Home* licence, and it needs **R2025a or newer**. Sign in to your
+  MathWorks account through the
+  [Dauphine portal](https://www.mathworks.com/academia/tah-portal/universite-paris-dauphine-31082069.html)
+  to link it.
+- **GitHub Copilot** is unrelated to the university licence — it is free for students via
+  [GitHub Education](https://education.github.com/).
+
+Neither is required. Nothing in this course needs an assistant to complete.
+
 ---
 
 ## What's in here
@@ -54,9 +68,12 @@ a line will do before you run it, and that only works if you have not already re
 
 ### 1. Install MATLAB
 
-- Log in to [MyDauphine](https://my.dauphine.fr) (switch the site to English) → **Software**
-- Create a [MathWorks account](https://mathworks.com/accesslogin/createProfile.do) if you don't have one
-- Activate the licence with the university key (sent by email)
+- Go to the [Dauphine MathWorks portal](https://www.mathworks.com/academia/tah-portal/universite-paris-dauphine-31082069.html) → **Sign in to get started**
+- Create a [MathWorks account](https://mathworks.com/accesslogin/createProfile.do) **using your Dauphine
+  email address** — that address is what links you to the university licence
+- Download the installer from the License Center and run it
+- *Alternative route:* [MyDauphine](https://my.dauphine.fr) (switch the site to English) → **Software**,
+  which gives you the same licence via an activation key
 
 ### 2. Tick these two toolboxes during installation ← the step people miss
 

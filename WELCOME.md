@@ -8,12 +8,12 @@ the first hour.
 
 **1. Get the software**
 
-- Log in to [MyDauphine](https://my.dauphine.fr) (switch the site to English)
-- Go to **Software**
-- Create a [MathWorks account](https://mathworks.com/accesslogin/createProfile.do) if you don't have one
-- In the License Center, activate the licence with the university key
-  *(sent to you separately by email — please do not post it publicly)*
-- Download and install
+- Go to the [Dauphine MathWorks portal](https://www.mathworks.com/academia/tah-portal/universite-paris-dauphine-31082069.html) and click **Sign in to get started**
+- Create a [MathWorks account](https://mathworks.com/accesslogin/createProfile.do) **using your Dauphine
+  email address** — that address is what links you to the university licence
+- Download and install from the License Center
+- *If that does not work:* [MyDauphine](https://my.dauphine.fr) (switch the site to English) → **Software**,
+  and activate with the university key *(sent to you separately by email — please do not post it publicly)*
 
 **2. Tick these two toolboxes during installation** ← the step people miss
 
