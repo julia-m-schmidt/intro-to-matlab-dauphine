@@ -50,15 +50,64 @@ end
 % from the copy: your analysis must still run next week.
 tableCode = 'QDL/BCHAIN';              % BCHAIN table (Tables API)
 
-% Pull the whole BCHAIN table as CSV, then filter inside MATLAB.
+% Ask the server for the MKPRU series as CSV, then tidy it inside MATLAB.
+%
+%  sprintf fills in a template. The two %s are placeholders, replaced IN ORDER
+% by tableCode and apiKey. Building the address this way keeps the key in one
+% variable instead of in the middle of a string you might read out or paste.
+%
+%  Read the finished URL in pieces:
+%    /api/v3/datatables/   the Tables API. The older /datasets/ endpoint is a
+%                          different service and answers in a different shape.
+%    QDL/BCHAIN            WHICH table: publisher QDL, table BCHAIN.
+%    .csv                  the format to send back. Ask for .json instead and
+%                          readtable below would have nothing it can parse.
+%    ?code=MKPRU           a FILTER, applied on the server. MKPRU is BCHAIN's
+%                          name for MarKet PRice Usd - the average price of
+%                          one bitcoin in dollars across the major exchanges.
+%                          BCHAIN holds many other series (transaction counts,
+%                          hash rate, fees); asking for this one code means
+%                          the rest is never downloaded.
+%    &api_key=...          the credential. Everything after the ? is a query
+%                          string, and & is what joins one parameter to the next.
 url = sprintf(['https://data.nasdaq.com/api/v3/datatables/%s.csv?', ...
                'code=MKPRU&api_key=%s'], tableCode, apiKey);
 
+%  weboptions holds the SETTINGS for the request, kept separate from the
+% address itself:
+%    'Timeout',30   give up after 30 seconds. The default is 5, which a table
+%                   this size can genuinely exceed on a slow connection.
+%    'Accept'       the format we are willing to receive back.
+%    'User-Agent'   how we identify ourselves to the server. Some servers
+%                   refuse clients they do not recognise, so we claim to be
+%                   an ordinary browser.
 opts  = weboptions('Timeout',30,'HeaderFields',{'Accept' 'text/csv'; 'User-Agent' 'Mozilla/5.0'});
+
+%  tempname hands back a fresh unused path in the system temp folder, a
+% different one every call. We are about to write a file we do not want to
+% keep, and this guarantees it cannot land on top of something of yours.
 tmp   = [tempname,'.csv'];
+
+%  websave DOWNLOADS TO A FILE and returns where it put it. Its cousin webread
+% would hand you the contents as a variable instead. We want a file: readtable
+% is built to read files, and a file on disk can be opened and LOOKED AT on
+% the day the parsing goes wrong.
+%
+%  This is the line that fails when anything is wrong - no internet, rejected
+% key, server down. Read the HTTP code in the error: 403 means the key was
+% refused, 404 means the address is wrong, a timeout means neither.
 websave(tmp, url, opts);
 
+%  Now the file becomes a table. 'TextType','string' asks for string arrays
+% rather than the older cell-of-char, which is why T.code=="MKPRU" further
+% down can be written with == and just work.
 T = readtable(tmp, 'TextType','string');
+
+%  Column names arrive spelled the way the server spells them, and a name
+% containing a space or a dash cannot be typed as T.name. makeValidName
+% repairs them. Here they are already clean, so nothing changes today - it is
+% here so the script survives the day the provider adds a column called
+% 'last updated'.
 T.Properties.VariableNames = matlab.lang.makeValidName(T.Properties.VariableNames);  % code,date,value
 
 %% 1) CLEAN + FILTER + SAVE (DAILY)
@@ -96,5 +145,4 @@ fprintf('Saved %d daily rows to bchain_MKPRU_daily.csv\n', height(MKPRU_daily));
 fprintf('Range: %s .. %s\n', datestr(MKPRU_daily.date(1)), datestr(MKPRU_daily.date(end)));
 
 %  Look at what you saved before trusting it: first date, last date, row
-% count. Import, then LOOK - same habit as Lecture 1.
-
+% count. 
