@@ -15,20 +15,23 @@ the first hour.
 - *If that does not work:* [MyDauphine](https://my.dauphine.fr) (switch the site to English) → **Software**,
   and activate with the university key *(sent to you separately by email — please do not post it publicly)*
 
-**2. Tick these two toolboxes during installation** ← the step people miss
+**2. Tick these four toolboxes during installation** ← the step people miss
 
-When the installer asks which products to install, make sure both of these are selected:
+When the installer asks which products to install, make sure all four of these are selected:
 
-- **Statistics and Machine Learning Toolbox**
-- **Econometrics Toolbox**
+- **Statistics and Machine Learning Toolbox** — session 1 and Assignment 1
+- **Econometrics Toolbox** — session 1 and Assignment 1
+- **Optimization Toolbox** — session 4
+- **Symbolic Math Toolbox** — session 4
 
-Your licence covers every toolbox, but the installer only installs the ones you tick. We use
-functions from both in the first session and in Assignment 1.
+Your licence covers every toolbox, but the installer only installs the ones you tick. The first two
+we use in the first session and in Assignment 1; without the last two, none of the Lecture 4 code
+will run.
 
 **3. Check it worked**
 
-Open MATLAB, type `ver` in the Command Window, press Enter. You should see both toolboxes in
-the list. If you don't, you can add them later via **Home → Add-Ons → Get Add-Ons** — no
+Open MATLAB, type `ver` in the Command Window, press Enter. You should see all four toolboxes in
+the list. If any are missing, you can add them later via **Home → Add-Ons → Get Add-Ons** — no
 reinstall needed.
 
 **4. Register a free API key (needed for session 3)**

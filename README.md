@@ -75,18 +75,22 @@ a line will do before you run it, and that only works if you have not already re
 - *Alternative route:* [MyDauphine](https://my.dauphine.fr) (switch the site to English) → **Software**,
   which gives you the same licence via an activation key
 
-### 2. Tick these two toolboxes during installation ← the step people miss
+### 2. Tick these four toolboxes during installation ← the step people miss
 
-- **Statistics and Machine Learning Toolbox**
-- **Econometrics Toolbox**
+| Toolbox | Needed for |
+|---|---|
+| **Statistics and Machine Learning Toolbox** | session 1 and Assignment 1 |
+| **Econometrics Toolbox** | session 1 and Assignment 1 |
+| **Optimization Toolbox** | session 4 — `fminunc`, `fmincon`, `linprog` |
+| **Symbolic Math Toolbox** | session 4 — `syms`, for checking derivatives by hand |
 
-Your licence covers every toolbox, but **the installer only installs the ones you tick.** We use
-both in the first session and in Assignment 1.
+Your licence covers every toolbox, but **the installer only installs the ones you tick.** Without
+the Optimization Toolbox, none of the Lecture 4 code will run at all.
 
 ### 3. Check it worked
 
-Type `ver` in the Command Window and press Enter. Both toolboxes should appear in the list. If
-they don't, add them later via **Home → Add-Ons → Get Add-Ons** — no reinstall needed.
+Type `ver` in the Command Window and press Enter. All four toolboxes should appear in the list. If
+any are missing, add them later via **Home → Add-Ons → Get Add-Ons** — no reinstall needed.
 
 ### 4. Register a free API key (needed for session 3)
 
